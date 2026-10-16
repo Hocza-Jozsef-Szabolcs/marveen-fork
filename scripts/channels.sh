@@ -105,13 +105,7 @@ if [ -f "$INSTALL_DIR/.env" ]; then
   if [ -z "$_oauth" ] && [ -s "$INSTALL_DIR/store/.claude-oauth-token" ]; then
     _oauth="$(cat "$INSTALL_DIR/store/.claude-oauth-token")"
   fi
-  # An exported CLAUDE_CODE_OAUTH_TOKEN puts the CLI in OAuth authMode, where
-  # a custom ANTHROPIC_BASE_URL is silently IGNORED -- so when an API-key auth
-  # is configured the OAuth token must NOT reach the claude process, else the
-  # provider redirect never happens.
-  if [ -z "$_api_key" ] && [ -z "$_auth_token" ]; then
-    [ -n "$_oauth" ] && export CLAUDE_CODE_OAUTH_TOKEN="$_oauth"
-  fi
+  [ -n "$_oauth" ] && export CLAUDE_CODE_OAUTH_TOKEN="$_oauth"
   unset _api_key _oauth _auth_token _base_url
 fi
 CHANNEL_PROVIDER="${CHANNEL_PROVIDER:-telegram}"
@@ -1375,10 +1369,6 @@ _tmux_set_auth_globals() {
   fi
   if [ -n "${ANTHROPIC_AUTH_TOKEN:-}" ]; then
     $TMUX set-environment -g ANTHROPIC_AUTH_TOKEN "$ANTHROPIC_AUTH_TOKEN" 2>/dev/null || true
-    # API-key authMode: a stale OAuth token in the shared server env would flip
-    # the claude processes back to OAuth mode, where the custom base URL is
-    # ignored. Scrub it globally (-gu), mirroring the channel-token scrub.
-    $TMUX set-environment -gu CLAUDE_CODE_OAUTH_TOKEN 2>/dev/null || true
   fi
   if [ -n "${ANTHROPIC_BASE_URL:-}" ]; then
     $TMUX set-environment -g ANTHROPIC_BASE_URL "$ANTHROPIC_BASE_URL" 2>/dev/null || true
