@@ -47,6 +47,11 @@ def fresh_db(path):
         parent_id TEXT, dispatched_at INTEGER);
       CREATE TABLE kanban_comments (id INTEGER PRIMARY KEY AUTOINCREMENT, card_id TEXT NOT NULL,
         author TEXT NOT NULL, content TEXT NOT NULL, created_at INTEGER NOT NULL);
+      -- KARTYAEVENTS1010: a mozgatas ezekbe is ir (a db.ts DDL-je szo szerint).
+      CREATE TABLE kanban_card_events (id INTEGER PRIMARY KEY AUTOINCREMENT, card_id TEXT NOT NULL,
+        from_status TEXT, to_status TEXT NOT NULL, actor TEXT, created_at INTEGER NOT NULL);
+      CREATE TABLE kanban_card_field_events (id INTEGER PRIMARY KEY AUTOINCREMENT, card_id TEXT NOT NULL,
+        field TEXT NOT NULL, old_value TEXT, new_value TEXT, actor TEXT, created_at INTEGER NOT NULL);
       CREATE TABLE agent_messages (id INTEGER PRIMARY KEY AUTOINCREMENT, from_agent TEXT NOT NULL,
         to_agent TEXT NOT NULL, content TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'pending',
         result TEXT, created_at INTEGER NOT NULL, delivered_at INTEGER, completed_at INTEGER);
@@ -70,7 +75,9 @@ def fut(card_id, komment, leiras=None, extra=()):
     cf = os.path.join(d, 'c.txt')
     with open(cf, 'w', encoding='utf-8') as f:
         f.write(komment)
-    args = [sys.executable, SCRIPT, '--id', card_id, '--comment-file', cf, '--author', 'Geri']
+    # KOMMENTERTESITES922: ez a suite a LEIRAS-MOZGATAST meri, nem az ertesitest.
+    args = [sys.executable, SCRIPT, '--id', card_id, '--comment-file', cf, '--author', 'Geri',
+            '--nincs-ertesites-szandekos']
     if leiras is not None:
         df = os.path.join(d, 'd.txt')
         with open(df, 'w', encoding='utf-8') as f:
